@@ -5,22 +5,22 @@ pragma solidity ^0.8.23;
 //import "hardhat/console.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {LibAppStorage, AppStorage, USER_ROLE, LabOwnerExt, LabUserExt, LabUser, LabOwner} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, AppStorage, USER_ROLE, CPSOwnerExt, CPSUserExt, CPSUser, CPSOwner} from "../libraries/LibAppStorage.sol";
 import {LibAccessControlEnumerable} from "../libraries/LibAccessControlEnumerable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 
-contract LabAccessControlFacet is AccessControlUpgradeable {
+contract CPSAccessControlFacet is AccessControlUpgradeable {
  
    using EnumerableSet for EnumerableSet.AddressSet;
 
     constructor() {}
 
-    modifier onlyLabUserOwner(address account) {
+    modifier onlyCPSUserOwner(address account) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(
-            s.LabUsers[account].owner == msg.sender,
-            "Only the account that added the LabUser can perform this action"
+            s.CPSUsers[account].owner == msg.sender,
+            "Only the account that added the CPSUser can perform this action"
         );
         _;
     }
@@ -47,12 +47,25 @@ contract LabAccessControlFacet is AccessControlUpgradeable {
             
     }
  
+    /**
+     * @dev Adds a new owner with the specified name, account address, email, and country.
+     * Only the contract owner can call this function.
+     * The account must not already have the USER_ROLE.
+     * Returns true if the owner is successfully added, false otherwise.
+     * 
+     * @param name The name of the new owner.
+     * @param account The account address of the new owner.
+     * @param email The email of the new owner.
+     * @param country The country of the new owner.
+     * 
+     * @return success A boolean indicating whether the owner was successfully added.
+     */
     function addOwner(
         string memory name,
         address account,
         string memory email,
         string memory country
-    ) external notOwner(account)returns (bool success){
+    ) external notOwner(account) returns (bool success) {
         require(!hasRole(USER_ROLE, account), "Account already has USER_ROLE"); 
         bool granted = _grantRole(DEFAULT_ADMIN_ROLE, account);
         if (granted) 
@@ -60,24 +73,39 @@ contract LabAccessControlFacet is AccessControlUpgradeable {
         return granted;
     }
 
+    /**
+     * @dev Removes the owner role from the caller.
+     * Only the default admin role can call this function.
+     * This function revokes the DEFAULT_ADMIN_ROLE from the caller and removes their owner role.
+     * @return success A boolean indicating whether the operation was successful or not.
+     */
     function removeOwner() external onlyRole(DEFAULT_ADMIN_ROLE) returns (bool success){
         revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
         LibAccessControlEnumerable._removeOwnerRole(msg.sender);    
         return true;
+
+        // TODO: What if the owner has CPSUsers and/or CPSs?
     }
 
+    /**
+     * @dev Updates the owner information for the caller.
+     * @param name The name of the owner.
+     * @param email The email address of the owner.
+     * @param country The country of the owner.
+     * @return success A boolean indicating whether the update was successful.
+     */
     function updateOwner(
         string memory name,
         string memory email,
         string memory country
     ) external onlyRole(DEFAULT_ADMIN_ROLE) returns (bool success){
         AppStorage storage s = LibAppStorage.diamondStorage();
-        s.LabOwners[msg.sender] = LabOwner(name, email, country);
+        s.CPSOwners[msg.sender] = CPSOwner(name, email, country);
         return true;
     }
 
-    function isLabOwner(address account) external view returns (bool) {
-        return LibAccessControlEnumerable._isLabOwner(account);
+    function isCPSOwner(address account) external view returns (bool) {
+        return LibAccessControlEnumerable._isCPSOwner(account);
     }
 
     function addAllowed(
@@ -103,7 +131,7 @@ contract LabAccessControlFacet is AccessControlUpgradeable {
 
     function removeAllowed(
         address account
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) onlyLabUserOwner(account) returns (bool success){
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) onlyCPSUserOwner(account) returns (bool success){
         
         revokeRole(USER_ROLE, account);
         LibAccessControlEnumerable._removeUserRole(account);
@@ -115,29 +143,29 @@ contract LabAccessControlFacet is AccessControlUpgradeable {
         string memory email,
         uint256 startDate,
         uint256 endDate
-    ) external onlyLabUserOwner(account) onlyRole(DEFAULT_ADMIN_ROLE) returns (bool success){
+    ) external onlyCPSUserOwner(account) onlyRole(DEFAULT_ADMIN_ROLE) returns (bool success){
         AppStorage storage s = LibAppStorage.diamondStorage();
-        s.LabUsers[account] = LabUser(email, startDate, endDate, msg.sender);
+        s.CPSUsers[account] = CPSUser(email, startDate, endDate, msg.sender);
         return true;
     }
 
-    function isLabUser(address account) external view returns (bool) {
-        return LibAccessControlEnumerable._isLabUser(account);
+    function isCPSUser(address account) external view returns (bool) {
+        return LibAccessControlEnumerable._isCPSUser(account);
     }
 
-    function getLabOwners() external view returns (LabOwnerExt[] memory) {
-        return LibAccessControlEnumerable._getLabOwners();
+    function getCPSOwners() external view returns (CPSOwnerExt[] memory) {
+        return LibAccessControlEnumerable._getCPSOwners();
     }
 
-    function getLabUsers() external view returns (LabUserExt[] memory) {
-        return LibAccessControlEnumerable._getLabUsers();
+    function getCPSUsers() external view returns (CPSUserExt[] memory) {
+        return LibAccessControlEnumerable._getCPSUsers();
     }
 
-    function getLabUser(
+    function getCPSUser(
         address account
-    ) external view returns (LabUser memory) {
+    ) external view returns (CPSUser memory) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        return s.LabUsers[account];
+        return s.CPSUsers[account];
     }
     
 }

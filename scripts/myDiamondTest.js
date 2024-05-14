@@ -45,27 +45,27 @@ async function main() {
       require("../artifacts/contracts/Diamond.sol/Diamond.json").abi;
 
     const LoupeAbi=require("../artifacts/contracts/facets/DiamondLoupeFacet.sol/DiamondLoupeFacet.json").abi;
-    const LabFacetAbi=require("../artifacts/contracts/facets/LabFacet.sol/LabFacet.json").abi;
-    const LabAccessControlFacetAbi=require("../artifacts/contracts/facets/LabAccessControlFacet.sol/LabAccessControlFacet.json").abi;
-    const LabTokenDiamondAbi=require("../artifacts/hardhat-diamond-abi/HardhatDiamondABI.sol/LabTokenDiamond.json").abi; 
+    const CPSFacetAbi=require("../artifacts/contracts/facets/CPSFacet.sol/CPSFacet.json").abi;
+    const CPSAccessControlFacetAbi=require("../artifacts/contracts/facets/CPSAccessControlFacet.sol/CPSAccessControlFacet.json").abi;
+    const CPSTokenDiamondAbi=require("../artifacts/hardhat-diamond-abi/HardhatDiamondABI.sol/CPSTokenDiamond.json").abi; 
 
-    const diamondContract = new ethers.Contract(diamondContractAddress, LabTokenDiamondAbi, provider.getSigner(signers[0]));
+    const diamondContract = new ethers.Contract(diamondContractAddress, CPSTokenDiamondAbi, provider.getSigner(signers[0]));
     const diamondLoupe = new ethers.Contract(diamondContractAddress, LoupeAbi, provider.getSigner(signers[0]));
-    const labFacet = new ethers.Contract(diamondContractAddress, LabFacetAbi, provider.getSigner(signers[0]));
-    const labAccessControlFacet = new ethers.Contract(diamondContractAddress, LabAccessControlFacetAbi, provider.getSigner(signers[0]));
+    const cpsFacet = new ethers.Contract(diamondContractAddress, CPSFacetAbi, provider.getSigner(signers[0]));
+    const cpsAccessControlFacet = new ethers.Contract(diamondContractAddress, CPSAccessControlFacetAbi, provider.getSigner(signers[0]));
 
-    const labAccessControlFacets = [];
-    const labFacets = [];
+    const cpsAccessControlFacets = [];
+    const cpsFacets = [];
     const diamondContracts = [];
     
-    console.log('Iniciando creación de owners, users y labs');
+    console.log('Iniciando creación de owners, users y cpss');
     for (let i = 0; i < 10; i++) {
       const signer = provider.getSigner(signers[i]);
-      let contract = new ethers.Contract(diamondContractAddress, LabAccessControlFacetAbi, signer);
-      labAccessControlFacets.push(contract);
-      contract = new ethers.Contract(diamondContractAddress, LabFacetAbi, signer);
-      labFacets.push(contract);
-      contract = new ethers.Contract(diamondContractAddress, LabTokenDiamondAbi, signer);
+      let contract = new ethers.Contract(diamondContractAddress, CPSAccessControlFacetAbi, signer);
+      cpsAccessControlFacets.push(contract);
+      contract = new ethers.Contract(diamondContractAddress, CPSFacetAbi, signer);
+      cpsFacets.push(contract);
+      contract = new ethers.Contract(diamondContractAddress, CPSTokenDiamondAbi, signer);
       diamondContracts.push(contract);
     }
     
@@ -112,23 +112,23 @@ async function main() {
    //   console.log("User", user.name, "added");
 
       for (let j = 1; j <= 5; j++) {
-        let lab = {
+        let cps = {
           id: 0,
-          name: "Owner_" + name + "_Lab_" + j,
+          name: "Owner_" + name + "_CPS_" + j,
           info: "Info_" + j + "_" + name,
-          url: "http://lab_" + j + "_" + name + ".example.com",
+          url: "http://cps_" + j + "_" + name + ".example.com",
           owner: signers[i],
           price: generateRandomWeiValue(),
-          labAvailableStart: generateRandomDate("2023-09-01", "2023-09-30"),
-          labAvailableEnd: generateRandomDate("2024-08-01", "2024-08-30"),
+          cpsAvaicpsleStart: generateRandomDate("2023-09-01", "2023-09-30"),
+          cpsAvaicpsleEnd: generateRandomDate("2024-08-01", "2024-08-30"),
         };
   
-        result = await labFacets[i].addLab(
-          lab.name,
-          lab.url,
-          lab.price,
-          lab.labAvailableStart,
-          lab.labAvailableEnd
+        result = await cpsFacets[i].addCPS(
+          cps.name,
+          cps.url,
+          cps.price,
+          cps.cpsAvaicpsleStart,
+          cps.cpsAvaicpsleEnd
         );
         
   
@@ -137,14 +137,14 @@ async function main() {
 
     }
 
-    result = await labAccessControlFacet.getLabOwners();
+    result = await cpsAccessControlFacet.getCPSOwners();
     console.log("Owners:", result.length);
 
-    result = await labAccessControlFacet.getLabUsers();
+    result = await cpsAccessControlFacet.getCPSUsers();
     console.log("Users:", result.length);
 
-    result = await labFacet.getAllLabs();
-    console.log("Labs:", result.length);
+    result = await cpsFacet.getAllCPSs();
+    console.log("CPSs:", result.length);
 
     
 }  

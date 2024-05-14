@@ -9,27 +9,27 @@ bytes32 constant USER_ROLE = keccak256("USER_ROLE");
 bytes32 constant APP_STORAGE_POSITION = keccak256("diamond.standard.app.storage");
 
   
-struct LabOwner {
+struct CPSOwner {
         string name;
         string email;
         string country;
     }
 
-struct LabOwnerExt {
+struct CPSOwnerExt {
         address account;
-        LabOwner base;
+        CPSOwner base;
     }
 
-struct LabUser {
+struct CPSUser {
         string email;
         uint256 startDate;
         uint256 endDate;
-        address owner; // New field to store the account that added the LabUser
+        address owner; // New field to store the account that added the CPSUser
     }
 
-struct LabUserExt {
+struct CPSUserExt {
         address account;
-        LabUser base;
+        CPSUser base;
     }
 
 struct Rental {
@@ -40,7 +40,7 @@ struct Rental {
     uint256 end;
 }
 
-struct Lab {
+struct CPS {
         string name;
         string url;
         uint256 price;
@@ -48,10 +48,10 @@ struct Lab {
         uint endDate;
     }
 
-struct LabExt {
-        uint labId;
+struct CPSExt {
+        uint CPSId;
         address owner;
-        Lab base;
+        CPS base;
 }
 
 
@@ -61,14 +61,14 @@ struct AppStorage {
 
          mapping(bytes32 role => EnumerableSet.AddressSet) _roleMembers;
         
-         mapping(address => LabOwner) LabOwners;
-         mapping(address => LabUser) LabUsers;
+         mapping(address => CPSOwner) CPSOwners;
+         mapping(address => CPSUser) CPSUsers;
          mapping(address => RivalIntervalTreeLibrary.Tree) userCalendars;
 
          mapping(uint256 => RivalIntervalTreeLibrary.Tree) calendars;
          mapping(uint256 => mapping(uint256 => Rental)) rentals;
 
-         mapping(uint => Lab)  Labs;
+         mapping(uint => CPS)  CPSs;
 }
 
 library LibAppStorage {

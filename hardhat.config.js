@@ -25,7 +25,7 @@ module.exports = {
   solidity: '0.8.24',
   diamondAbi: {
     // (required) The name of your Diamond ABI
-    name: "LabTokenDiamond",
+    name: "CPSTokenDiamond",
     strict: false
   },
   settings: {

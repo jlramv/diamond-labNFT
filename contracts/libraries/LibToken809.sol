@@ -75,9 +75,10 @@ library LibToken809 {
         // Reverts if impossible
         /*   require(
             !renterCalendars[msg.sender].overlaps(_start, _end),
-            "User already reserved one lab"
+            "User already reserved one CPS"
         );*/
         AppStorage storage s = LibAppStorage.diamondStorage();
+        require(!s.userCalendars[_renter].overlaps(_start, _end), "User already reserved one CPS");
         s.calendars[_tokenId].insert(_start, _end);
         //      renterCalendars[msg.sender].insert(_start, _end);
         Rental memory rental = Rental(_renter, _tokenId, _price, _start, _end);

@@ -4,7 +4,7 @@
 pragma solidity ^0.8.20;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {LibAppStorage, AppStorage, USER_ROLE, LabOwner, LabUser, LabOwnerExt, LabUserExt} from "./LibAppStorage.sol";
+import {LibAppStorage, AppStorage, USER_ROLE, CPSOwner, CPSUser, CPSOwnerExt, CPSUserExt} from "./LibAppStorage.sol";
 
 /**
  * @dev Extension of {AccessControl} that allows enumerating the members of each role.
@@ -14,12 +14,12 @@ library LibAccessControlEnumerable {
 
     event UserAdded(address indexed account, string email, uint256 startDate, uint256 endDate);
 
-    function _isLabOwner(address account) internal view returns (bool) {
+    function _isCPSOwner(address account) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         return s._roleMembers[s.DEFAULT_ADMIN_ROLE].contains(account);
     }
 
-    function _isLabUser(address account) internal view returns (bool) {
+    function _isCPSUser(address account) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         return s._roleMembers[USER_ROLE].contains(account);
     }
@@ -44,7 +44,7 @@ library LibAccessControlEnumerable {
     function _addOwnerRole(address account, string memory name, string memory email, string memory country) internal returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         s._roleMembers[s.DEFAULT_ADMIN_ROLE].add(account);
-        s.LabOwners[account] = LabOwner(name, email, country);
+        s.CPSOwners[account] = CPSOwner(name, email, country);
         return true;
     }
 
@@ -54,14 +54,14 @@ library LibAccessControlEnumerable {
     function _removeOwnerRole(address account) internal returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         s._roleMembers[s.DEFAULT_ADMIN_ROLE].remove(account);
-        delete s.LabOwners[account];
+        delete s.CPSOwners[account];
         return true;
     }
 
     function _addUserRole(address account, string memory email, uint256 startDate, uint256 endDate) internal returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         s._roleMembers[USER_ROLE].add(account);
-        s.LabUsers[account] = LabUser(email, startDate, endDate, account);
+        s.CPSUsers[account] = CPSUser(email, startDate, endDate, account);
         emit UserAdded(account, email, startDate, endDate);
         return true;
     }
@@ -69,29 +69,29 @@ library LibAccessControlEnumerable {
     function _removeUserRole(address account) internal returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         s._roleMembers[USER_ROLE].remove(account);
-        delete s.LabUsers[account];
+        delete s.CPSUsers[account];
         return true;
     }
 
-    function _getLabOwners() internal view returns (LabOwnerExt[] memory) {
+    function _getCPSOwners() internal view returns (CPSOwnerExt[] memory) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 totalLabOwners = getRoleMemberCount(s.DEFAULT_ADMIN_ROLE);
-        LabOwnerExt[] memory labOwners = new LabOwnerExt[](totalLabOwners);
-        for (uint256 i; i < totalLabOwners; i++) {
+        uint256 totalCPSOwners = getRoleMemberCount(s.DEFAULT_ADMIN_ROLE);
+        CPSOwnerExt[] memory CPSOwners = new CPSOwnerExt[](totalCPSOwners);
+        for (uint256 i; i < totalCPSOwners; i++) {
             address account = getRoleMember(s.DEFAULT_ADMIN_ROLE, i);
-            labOwners[i] = LabOwnerExt(account, s.LabOwners[account]);
+            CPSOwners[i] = CPSOwnerExt(account, s.CPSOwners[account]);
         }
-        return labOwners;
+        return CPSOwners;
     }
 
-    function _getLabUsers() internal view returns (LabUserExt[] memory) {
+    function _getCPSUsers() internal view returns (CPSUserExt[] memory) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 totalLabUsers = getRoleMemberCount(USER_ROLE);
-        LabUserExt[] memory labUsers = new LabUserExt[](totalLabUsers);
-        for (uint256 i; i < totalLabUsers; i++) {
+        uint256 totalCPSUsers = getRoleMemberCount(USER_ROLE);
+        CPSUserExt[] memory CPSUsers = new CPSUserExt[](totalCPSUsers);
+        for (uint256 i; i < totalCPSUsers; i++) {
             address account = getRoleMember(USER_ROLE, i);
-            labUsers[i] = LabUserExt(account, s.LabUsers[account]);
+            CPSUsers[i] = CPSUserExt(account, s.CPSUsers[account]);
         }
-        return labUsers;
+        return CPSUsers;
     }
 }

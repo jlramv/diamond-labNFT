@@ -97,39 +97,39 @@ console.log("LibToken809 address:", libToken809.address);
 
 //--------------------------------------------------------------------------------
 
-  const LabFacet = await ethers.getContractFactory('LabFacet',{
+  const CPSFacet = await ethers.getContractFactory('CPSFacet',{
     libraries: {
       RivalIntervalTreeLibrary: treeLibrary.address,
       LibToken809: libToken809.address
   }});
 
-  const labFacet = await LabFacet.deploy()
-  await labFacet.deployed()
-  console.log("LabFacet address:", labFacet.address);
+  const cpsFacet = await CPSFacet.deploy()
+  await cpsFacet.deployed()
+  console.log("CPSFacet address:", cpsFacet.address);
 
-  await labFacet.initialize('Lab809Token','LTK');
+  await cpsFacet.initialize('CPS809Token','LTK');
 
 
 
-  let selectors = getSelectors(labFacet).remove(['supportsInterface(bytes4)'])
+  let selectors = getSelectors(cpsFacet).remove(['supportsInterface(bytes4)'])
 
   myFacets.push({
-    facetAddress: labFacet.address,
+    facetAddress: cpsFacet.address,
     action: FacetCutAction.Add,
     functionSelectors: selectors
   });
 
 //---------
-//LabControlFacet
-const LabAccessControlFacet = await ethers.getContractFactory('LabAccessControlFacet')
-const labAccessControlFacet = await LabAccessControlFacet.deploy()
-await labAccessControlFacet.deployed()
-console.log("LabAccessControlFacet address:", labAccessControlFacet.address);
+//CPSControlFacet
+const CPSAccessControlFacet = await ethers.getContractFactory('CPSAccessControlFacet')
+const cpsAccessControlFacet = await CPSAccessControlFacet.deploy()
+await cpsAccessControlFacet.deployed()
+console.log("CPSAccessControlFacet address:", cpsAccessControlFacet.address);
 
-selectors = getSelectors(labAccessControlFacet).remove(['supportsInterface(bytes4)'])
+selectors = getSelectors(cpsAccessControlFacet).remove(['supportsInterface(bytes4)'])
 
 myFacets.push({
-  facetAddress: labAccessControlFacet.address,
+  facetAddress: cpsAccessControlFacet.address,
   action: FacetCutAction.Add,
   functionSelectors: selectors
 });
@@ -144,10 +144,10 @@ myFacets.push({
     throw Error(`Diamond upgrade failed: ${tx.hash}`)
   }
 
-  let labAccessControl=await ethers.getContractAt('LabAccessControlFacet', diamond.address);
-  await labAccessControl.initialize('My','juanluis@melilla.uned.es','Spain');
+  let cpsAccessControl=await ethers.getContractAt('CPSAccessControlFacet', diamond.address);
+  await cpsAccessControl.initialize('My','juanluis@melilla.uned.es','Spain');
 
-  console.log('LabFacets added to diamond')
+  console.log('CPSFacets added to diamond')
 
   // returning the address of the diamond
   return diamond.address
