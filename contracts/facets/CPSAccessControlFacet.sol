@@ -8,11 +8,12 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import {LibAppStorage, AppStorage, USER_ROLE, CPSOwnerExt, CPSUserExt, CPSUser, CPSOwner} from "../libraries/LibAppStorage.sol";
 import {LibAccessControlEnumerable} from "../libraries/LibAccessControlEnumerable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-
+import "../external/CPSERC20.sol";
 
 contract CPSAccessControlFacet is AccessControlUpgradeable {
  
    using EnumerableSet for EnumerableSet.AddressSet;
+   CPSERC20 public cPSERC20_; //No se puede utilizar cPSERC20 porque es un nombre reservado en la otra facet
 
     constructor() {}
 
@@ -28,7 +29,7 @@ contract CPSAccessControlFacet is AccessControlUpgradeable {
     modifier notOwner(address account) {
         require(
             !hasRole(DEFAULT_ADMIN_ROLE, account),
-            "Account already has DEFAULT_ADMIN_ROLE"
+            "Account already has the role"
         );
         _;
     }
@@ -36,15 +37,16 @@ contract CPSAccessControlFacet is AccessControlUpgradeable {
     function initialize (
         string memory name,
         string memory email,
-        string memory country
+        string memory country,
+        address _cPSERC20
     ) public initializer {
         bool granted = _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         if (granted) 
             LibAccessControlEnumerable._addOwnerRole(msg.sender, name, email, country);
 
         AppStorage storage s = LibAppStorage.diamondStorage();
-        s.DEFAULT_ADMIN_ROLE = DEFAULT_ADMIN_ROLE;    
-            
+        s.DEFAULT_ADMIN_ROLE = DEFAULT_ADMIN_ROLE;
+        cPSERC20_ = CPSERC20(_cPSERC20);    
     }
  
     /**
@@ -68,8 +70,10 @@ contract CPSAccessControlFacet is AccessControlUpgradeable {
     ) external notOwner(account) returns (bool success) {
         require(!hasRole(USER_ROLE, account), "Account already has USER_ROLE"); 
         bool granted = _grantRole(DEFAULT_ADMIN_ROLE, account);
-        if (granted) 
+        if (granted) {
             LibAccessControlEnumerable._addOwnerRole(account, name, email, country);
+            cPSERC20_.mint(account, 1000);
+        }           
         return granted;
     }
 
@@ -122,6 +126,7 @@ contract CPSAccessControlFacet is AccessControlUpgradeable {
         require(!hasRole(USER_ROLE, account), "Account already has USER_ROLE");
         if (_grantRole(USER_ROLE, account)){
             LibAccessControlEnumerable._addUserRole(account, email, startDate, endDate);
+            cPSERC20_.transferFrom(msg.sender, account, 100);
             return true;
         }else {
             return false;
@@ -135,6 +140,11 @@ contract CPSAccessControlFacet is AccessControlUpgradeable {
         
         revokeRole(USER_ROLE, account);
         LibAccessControlEnumerable._removeUserRole(account);
+
+        uint256 _balance=cPSERC20_.balanceOf(account);
+        if (_balance > 0)
+            cPSERC20_.transferFrom(account, msg.sender, _balance);
+
         return true;
     }
 

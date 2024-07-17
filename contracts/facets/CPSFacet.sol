@@ -6,10 +6,11 @@ import "../libraries/RivalIntervalTreeLibrary.sol";
 import {LibAppStorage, AppStorage, CPS, CPSExt, Rental} from "../libraries/LibAppStorage.sol";
 import {LibToken809} from "../libraries/LibToken809.sol";
 import {LibAccessControlEnumerable} from "../libraries/LibAccessControlEnumerable.sol";
-
+import "../external/CPSERC20.sol";
 
 contract CPSFacet is ERC721EnumerableUpgradeable{
     using RivalIntervalTreeLibrary for RivalIntervalTreeLibrary.Tree;
+    CPSERC20 public cPSERC20;
 
     uint private _CPSId;
     constructor() {}
@@ -35,8 +36,9 @@ contract CPSFacet is ERC721EnumerableUpgradeable{
         _;
     }
 
-    function initialize(string memory _name, string memory _symbol )  initializer public{
+    function initialize(string memory _name, string memory _symbol, address _CPSERC20 )  initializer public{
         __ERC721_init(_name, _symbol);
+        cPSERC20 = CPSERC20(_CPSERC20);
         _CPSId=0;
     }
 

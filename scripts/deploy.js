@@ -7,6 +7,12 @@ async function deployDiamond () {
   const accounts = await ethers.getSigners()
   const contractOwner = accounts[0]
 
+  // Deploy CPSERC20
+  const CPSERC20 = await ethers.getContractFactory('CPSERC20')
+  const cpsERC20 = await CPSERC20.deploy()
+  await cpsERC20.deployed()
+  console.log("CPSERC20 deployed:", cpsERC20.address)
+
   // Deploy DiamondInit
   // DiamondInit provides a function that is called when the diamond is upgraded or deployed to initialize state variables
   // Read about how the diamondCut function works in the EIP2535 Diamonds standard
@@ -107,8 +113,7 @@ console.log("LibToken809 address:", libToken809.address);
   await cpsFacet.deployed()
   console.log("CPSFacet address:", cpsFacet.address);
 
-  await cpsFacet.initialize('CPS809Token','LTK');
-
+  await cpsFacet.initialize('CPS809Token','LTK', cpsERC20.address);
 
 
   let selectors = getSelectors(cpsFacet).remove(['supportsInterface(bytes4)'])
@@ -128,13 +133,14 @@ console.log("CPSAccessControlFacet address:", cpsAccessControlFacet.address);
 
 selectors = getSelectors(cpsAccessControlFacet).remove(['supportsInterface(bytes4)'])
 
+//console.log('CPSAccessControlFacet selectors:', selectors)
 myFacets.push({
   facetAddress: cpsAccessControlFacet.address,
   action: FacetCutAction.Add,
   functionSelectors: selectors
 });
 
-//-----------------
+
 
   tx = await diamondCutFacet.diamondCut(
     myFacets,
@@ -145,7 +151,7 @@ myFacets.push({
   }
 
   let cpsAccessControl=await ethers.getContractAt('CPSAccessControlFacet', diamond.address);
-  await cpsAccessControl.initialize('My','juanluis@melilla.uned.es','Spain');
+  await cpsAccessControl.initialize('My','juanluis@melilla.uned.es','Spain', cpsERC20.address);
 
   console.log('CPSFacets added to diamond')
 
