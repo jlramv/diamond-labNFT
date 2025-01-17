@@ -1,0 +1,28 @@
+{
+  "name": "CPSName",
+  "description": "SystemDescription",
+  "image": "LinkToImg1",
+  "external_url": "AccessLinkToCPS",
+  "attributes": [
+    {
+      "trait_type": "Author(s)",
+      "value": "AuthName1, AuthName2"
+    },
+    {
+      "trait_type": "Contact",
+      "value": "ContactEmail"
+    },
+    {
+      "trait_type": "Keywords",
+      "value": "Keyword1, Keyword2"
+    },
+    {
+      "trait_type": "Total Images",
+      "value": totalImages
+    }
+  ],
+  "additional_images": [
+    "LinkToImg2",
+    "LinkToImg3",
+  ]
+}

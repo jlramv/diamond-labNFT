@@ -1,0 +1,24 @@
+{
+   [
+        {
+          "start_date": "startDate",
+          "end_date": "endDate",
+          "week_days": [
+            {
+              "days": ["weekday1", "weekday2","......"],
+              "hours": [
+                {"start": "xx:xx", "end": "xx:xx"},
+                {"start": "xx:xx", "end": "xx:xx"}
+              ]
+            },
+            {
+              "day": "weekday1",
+              "hours": [
+                {"start": "xx:xx", "end": "xx:xx"}
+              ]
+            }
+          ]
+        },
+      ]
+
+}
